@@ -45,17 +45,17 @@ def select_chapter_logic(conf):
 
 # 游戏结束页面
 def game_end_logic(conf, game_run_result):
-    done = False
+    next_page = None
     clock = pygame.time.Clock()
 
-    while not done:
+    while next_page is None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
-                    done = True
+                    next_page = "select_chapter"
         # 绘制页面的代码
         conf.screen.fill((255, 255, 255))
 
@@ -67,15 +67,14 @@ def game_end_logic(conf, game_run_result):
 
         text_render = font.render(text, True, (0, 0, 0))
 
-        # image_rect = conf.game_over.get_rect()
-        x = (conf.SCREEN_WIDTH) // 2
-        y = (conf.SCREEN_HEIGHT - 36) // 2
+        x = (conf.SCREEN_WIDTH-100) // 2
+        y = (conf.SCREEN_HEIGHT) // 2
 
         conf.screen.blit(text_render, (x, y))
 
         pygame.display.flip()
         clock.tick(60)
-    return done
+    return next_page
 
 
 # 游戏执行页面
@@ -103,21 +102,21 @@ def game_run_logic(conf, josn_name):
 
     json_config = conf.load_json_conf(josn_name)
 
-    pygame.display.set_caption("TankBattle")
+    pygame.display.set_caption(json_config["title"])
 
     enemy_tank_seq = 1000
     bgMap = map.Map(json_config)
 
-    ourTank1 = Tank(1, 0, 1, 0, "our", None, None, 3, 3 + 24 * 8, 3 + 24 * 24)
+    ourTank1 = Tank(1, 0, 1, 0, "our", None, None, 3, 195, 579)
     conf.tankGroup.add(ourTank1)
     conf.ourTankGroup.add(ourTank1)
-    ourTank2 = Tank(2, 1, 0, 0, "our", None, None, 3, 3 + 24 * 16, 3 + 24 * 24)
+    ourTank2 = Tank(2, 1, 0, 0, "our", None, None, 3, 387, 579)
     conf.tankGroup.add(ourTank2)
     conf.ourTankGroup.add(ourTank2)
 
-    for i in range(4):
+    for i in range(3):
         enemy_tank_seq = enemy_tank_seq + 1
-        enemyTank1 = Tank(enemy_tank_seq, None, 1, None, "enemy", 1, True, 3, 3 + i * 12 * 24, 3 + 0 * 24)
+        enemyTank1 = Tank(enemy_tank_seq, None, 1, None, "enemy", 1, True, 3, 3 + i * 288, 3)
         conf.tankGroup.add(enemyTank1)
         conf.enemyTankGroup.add(enemyTank1)
 
@@ -134,7 +133,7 @@ def game_run_logic(conf, josn_name):
             if event.type == conf.EVENT_CREATE_PROP:
                 the_prop = Prop()
                 conf.propGroup.add(the_prop)
-                print("EVENT_CREATE_PROP", the_prop.rect)
+                print("EVENT_CREATE_PROP", the_prop.kind,the_prop.rect)
 
             # 创建我们的坦克
             if event.type == conf.EVENT_NEW_OUR_TANK:
@@ -183,18 +182,16 @@ def game_run_logic(conf, josn_name):
                     enemyTank.locked = False
             # EVENT_IRON_HOME
             if event.type == conf.EVENT_IRON_HOME:
-                for x, y in [(11, 23), (12, 23), (13, 23), (14, 23), (11, 24), (14, 24), (11, 25), (14, 25)]:
+                for x, y in [(267, 555), (291, 555), (315, 555), (339, 555), (267, 579), (339, 579), (267, 603), (339, 603)]:
                     bgMap.iron = map.Iron()
-                    bgMap.iron.rect.left, bgMap.iron.rect.top = 3 + x * 24, 3 + y * 24
+                    bgMap.iron.rect.left, bgMap.iron.rect.top = x, y
                     print("bgMap.iron.rect",bgMap.iron.rect)
                     bgMap.ironGroup.add(bgMap.iron)
                 pygame.time.set_timer(pygame.event.Event(conf.EVENT_NOT_IRON_HOME), 8000, 1)
             # EVENT_NOT_IRON_HOME
             if event.type == conf.EVENT_NOT_IRON_HOME:
                 for this_iron in bgMap.ironGroup:
-                    for this_iron.x, this_iron.y in [(11, 23), (12, 23), (13, 23), (14, 23), (11, 24), (14, 24),
-                                                     (11, 25),
-                                                     (14, 25)]:
+                    for this_iron.x, this_iron.y in [(267, 555), (291, 555), (315, 555), (339, 555), (267, 579), (339, 579), (267, 603), (339, 603)]:
                         bgMap.ironGroup.remove(this_iron)
 
             # EVENT_PROTECT
@@ -218,14 +215,14 @@ def game_run_logic(conf, josn_name):
 
             # EVENT_NONE_LIFE
             if event.type == conf.EVENT_NONE_OUR_LIFE:
-                game_run_result = "lose"
+                game_run_result = "lose_page"
             # EVENT_HOME_DESTROYED
             if event.type == conf.EVENT_HOME_DESTROYED:
                 bgMap.change_home_destroyed()
-                game_run_result = "lose"
+                game_run_result = "lose_page"
             # EVENT_NONE_ENEMY_LIFE
             if event.type == conf.EVENT_NONE_ENEMY_LIFE:
-                game_run_result = "win"
+                game_run_result = "win_page"
 
         # 校验是否已经全部没有生命值
         conf.check_lose_win()

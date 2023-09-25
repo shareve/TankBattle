@@ -109,7 +109,8 @@ bulletGroup = pygame.sprite.Group()
 ourBulletGroup = pygame.sprite.Group()
 enemyBulletGroup = pygame.sprite.Group()
 
-home_rect = 3 + 12 * 24, 3 + 24 * 24
+home_rect = 291, 579
+
 
 def gain_our_tank_img(player_id, level):
     tank_together_image = p1_tank_L0_image
@@ -167,10 +168,11 @@ def gain_num(num):
 # 读取配置文件
 def load_json_conf(josn_name):
     with open(josn_name, "r") as file:
-        config = json.load(file)
-    return config
+        config_json = json.load(file)
+    return config_json
 
 
+# 校验输赢
 def check_lose_win():
     none_our_life = True
     for tank in ourTankGroup:
@@ -189,8 +191,3 @@ def check_lose_win():
         event = pygame.event.Event(EVENT_NONE_ENEMY_LIFE)
         # 将自定义事件放入事件队列
         pygame.event.post(event)
-
-    # if home_destroyed == True:
-    #     # print("check_lose_win,home_destroyed=",home_destroyed)
-    #     event = pygame.event.Event(EVENT_HOME_DESTROYED)
-    #     pygame.event.post(event)
