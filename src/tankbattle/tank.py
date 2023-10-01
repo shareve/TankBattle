@@ -34,21 +34,18 @@ class Tank(pygame.sprite.Sprite):
 
     def shoot(self):
         bullet_speed = 10
-        bullet_strong = False
-
-        if self.own_group == "our":
-            print("shoot,level", self.level, pygame.time.get_ticks())
+        bullet_lv = 1
 
         if self.level == 1:
-            bullet_speed = 16
-            bullet_strong = False
+            bullet_speed = 10
+            bullet_lv = 1
         if self.level == 2:
             bullet_speed = 16
-            bullet_strong = True
+            bullet_lv = 1
         if self.level == 3:
-            bullet_speed = 24
-            bullet_strong = True
-        the_bullet = bullet.Bullet(True, self.id, self.own_group, bullet_strong, bullet_speed, self.dir_x, self.dir_y)
+            bullet_speed = 16
+            bullet_lv = 2
+        the_bullet = bullet.Bullet(True, self.id, self.own_group, bullet_lv, bullet_speed, self.dir_x, self.dir_y)
 
         if the_bullet.dir_x == 0 and the_bullet.dir_y == -1:
             the_bullet.rect.left = self.rect.left + 15

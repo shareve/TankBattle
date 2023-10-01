@@ -3,7 +3,7 @@ import pygame
 import conf
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, life, owner, own_group, strong, speed, dir_x, dir_y):
+    def __init__(self, life, owner, own_group, lv, speed, dir_x, dir_y):
         pygame.sprite.Sprite.__init__(self)
 
         self.bullet_up = conf.bullet_up
@@ -11,13 +11,12 @@ class Bullet(pygame.sprite.Sprite):
         self.bullet_left = conf.bullet_left
         self.bullet_right = conf.bullet_right
 
-
         # 速度
         self.speed = speed
         # 是否活着
         self.life = life
-        # 是否能打铁
-        self.strong = strong
+        # 子弹等级，1为普通，2为可打铁，3为可打铁+树
+        self.lv = lv
 
         self.owner = owner
         # 属于哪个组
@@ -75,13 +74,12 @@ class Bullet(pygame.sprite.Sprite):
                             enemy_tank.has_prop = False
                             # 创建一个页面出随机道具事件对象，并携带参数
                             custom_event = pygame.event.Event(conf.EVENT_CREATE_PROP)
-                            # 将自定义事件放入事件队列
                             pygame.event.post(custom_event)
                         if enemy_tank.life_times > 0:
                             enemy_tank.life_times -= 1
-                            # 创建一个页面出随机道具事件对象，并携带参数
+                            print("enemy_tank.life_times", enemy_tank.id, enemy_tank.life_times)
+                            # 创建一个新敌人坦克出现事件对象，并携带参数
                             event_rand_enemy = pygame.event.Event(conf.EVENT_NEW_ENEMY_TANK, tank=enemy_tank)
-                            # 将自定义事件放入事件队列
                             pygame.event.post(event_rand_enemy)
 
                 # 子弹碰墙
@@ -90,11 +88,18 @@ class Bullet(pygame.sprite.Sprite):
                     conf.ourBulletGroup.remove(self)
                     conf.bulletGroup.remove(self)
                 # 子弹碰铁
-                if pygame.sprite.spritecollide(self, bg_map.ironGroup, False, None):
-                    self.life = False
-                    conf.ourBulletGroup.remove(self)
-                    conf.bulletGroup.remove(self)
-                    conf.hit_sound.play()
+                if self.lv == 1:
+                    if pygame.sprite.spritecollide(self, bg_map.ironGroup, False, None):
+                        self.life = False
+                        conf.ourBulletGroup.remove(self)
+                        conf.bulletGroup.remove(self)
+                        conf.hit_sound.play()
+                elif self.lv == 2 or self.lv == 3:
+                    if pygame.sprite.spritecollide(self, bg_map.ironGroup, True, None):
+                        self.life = False
+                        conf.ourBulletGroup.remove(self)
+                        conf.bulletGroup.remove(self)
+                        conf.hit_sound.play()
                 # 子弹碰家
                 if self.rect.colliderect(bg_map.home.rect):
                     print("我方子弹和家发生碰撞")

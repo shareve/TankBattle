@@ -174,20 +174,18 @@ def load_json_conf(josn_name):
 
 # 校验输赢
 def check_lose_win():
-    none_our_life = True
-    for tank in ourTankGroup:
-        if tank.life_times > 0:
-            none_our_life = False
-    if none_our_life == True:
-        event = pygame.event.Event(EVENT_NONE_OUR_LIFE)
-        # 将自定义事件放入事件队列
+    total_enemy_life = 0
+    for enemy in enemyTankGroup:
+        total_enemy_life = total_enemy_life + enemy.life_times
+
+    total_our_life = 0
+    for our in ourTankGroup:
+        total_our_life = total_our_life + our.life_times
+
+    if total_enemy_life <= 0:
+        event = pygame.event.Event(EVENT_NONE_ENEMY_LIFE)
         pygame.event.post(event)
 
-    none_enemy_life = True
-    for tank in enemyTankGroup:
-        if tank.life_times > 0:
-            none_enemy_life = False
-    if none_enemy_life == True:
-        event = pygame.event.Event(EVENT_NONE_ENEMY_LIFE)
-        # 将自定义事件放入事件队列
+    if total_our_life <= 0:
+        event = pygame.event.Event(EVENT_NONE_OUR_LIFE)
         pygame.event.post(event)

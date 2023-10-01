@@ -79,10 +79,6 @@ def game_end_logic(conf, game_run_result):
 
 # 游戏执行页面
 def game_run_logic(conf, josn_name):
-    # 初始化 Pygame
-    pygame.init()
-    pygame.mixer.init()
-
     # 重置精灵组:坦克，我方坦克，敌方坦克
     conf.propGroup = pygame.sprite.Group()
     conf.tankGroup = pygame.sprite.Group()
@@ -92,33 +88,29 @@ def game_run_logic(conf, josn_name):
     conf.ourBulletGroup = pygame.sprite.Group()
     conf.enemyBulletGroup = pygame.sprite.Group()
 
-    # 定义屏幕宽度和高度
-    SCREEN_WIDTH = 630
-    SCREEN_HEIGHT = 630
-
     conf.start_sound.play()
-    # 创建屏幕对象
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     json_config = conf.load_json_conf(josn_name)
 
+    # 设置title
     pygame.display.set_caption(json_config["title"])
 
     enemy_tank_seq = 1000
     bgMap = map.Map(json_config)
 
-    ourTank1 = Tank(1, 0, 1, 0, "our", None, None, 3, 195, 579)
-    conf.tankGroup.add(ourTank1)
-    conf.ourTankGroup.add(ourTank1)
-    ourTank2 = Tank(2, 1, 0, 0, "our", None, None, 3, 387, 579)
+    our_tank1 = Tank(1, 0, 1, 0, "our", None, None, 3, 195, 579)
+    conf.tankGroup.add(our_tank1)
+    conf.ourTankGroup.add(our_tank1)
+    ourTank2 = Tank(2, 1, 1, 0, "our", None, None, 3, 387, 579)
     conf.tankGroup.add(ourTank2)
     conf.ourTankGroup.add(ourTank2)
 
+    # 按照位置分配敌方坦克,总数量为 3个位置*2个life_times=6个
     for i in range(3):
         enemy_tank_seq = enemy_tank_seq + 1
-        enemyTank1 = Tank(enemy_tank_seq, None, 1, None, "enemy", 1, True, 3, 3 + i * 288, 3)
-        conf.tankGroup.add(enemyTank1)
-        conf.enemyTankGroup.add(enemyTank1)
+        enemy = Tank(enemy_tank_seq, None, 2, None, "enemy", 1, True, 3, 3 + i * 288, 3)
+        conf.tankGroup.add(enemy)
+        conf.enemyTankGroup.add(enemy)
 
     clock = pygame.time.Clock()
 
@@ -139,11 +131,11 @@ def game_run_logic(conf, josn_name):
             if event.type == conf.EVENT_NEW_OUR_TANK:
                 tank = event.tank
                 if tank.player_id == 0:
-                    ourTank1 = Tank(tank.id, tank.player_id, tank.life_times, 0, "our", None, None, 3, 3 + 24 * 8,
+                    our_tank1 = Tank(tank.id, tank.player_id, tank.life_times, 0, "our", None, None, 3, 3 + 24 * 8,
                                     3 + 24 * 24)
-                    print("ourTank1.life_times", ourTank1.life_times)
-                    conf.tankGroup.add(ourTank1)
-                    conf.ourTankGroup.add(ourTank1)
+                    print("ourTank1.life_times", our_tank1.life_times)
+                    conf.tankGroup.add(our_tank1)
+                    conf.ourTankGroup.add(our_tank1)
                 else:
                     ourTank2 = Tank(2, 1, 3, 0, "our", None, None, 3, 3 + 24 * 16, 3 + 24 * 24)
                     print("ourTank2.life_times", ourTank2.life_times)
@@ -154,23 +146,29 @@ def game_run_logic(conf, josn_name):
             if event.type == conf.EVENT_NEW_ENEMY_TANK:
                 tank = event.tank
                 birth_place = random.choice([0, 1, 2])
-                enemyTankRand = Tank(tank.id, None, tank.life_times, None, "enemy", 1, True, 3,
+                enemy_tank_rand = Tank(tank.id, None, tank.life_times, None, "enemy", 1, True, 3,
                                      3 + birth_place * 12 * 24,
                                      3 + 0 * 24)
                 # 如果位置有冲突，1s后再试
-                list = pygame.sprite.spritecollide(enemyTankRand, conf.tankGroup, False, None)
+                list = pygame.sprite.spritecollide(enemy_tank_rand, conf.tankGroup, False, None)
                 if list:
-                    enemyTankRand = None
+                    enemy_tank_rand = None
                     pygame.time.set_timer(event, 1000, 1)
                 else:
-                    conf.tankGroup.add(enemyTankRand)
-                    conf.enemyTankGroup.add(enemyTankRand)
+                    conf.tankGroup.add(enemy_tank_rand)
+                    conf.enemyTankGroup.add(enemy_tank_rand)
 
             # 敌人全部爆
             if event.type == conf.EVENT_ALL_ENEMY_BOOM:
-                for enemyTank in conf.enemyTankGroup:
-                    conf.enemyTankGroup.remove(enemyTank)
-                    conf.tankGroup.remove(enemyTank)
+                for enemy_tank in conf.enemyTankGroup:
+                    conf.enemyTankGroup.remove(enemy_tank)
+                    conf.tankGroup.remove(enemy_tank)
+                    if enemy_tank.life_times > 0:
+                        enemy_tank.life_times -= 1
+                        print("enemyTank.life_times", enemy_tank.id, enemy_tank.life_times)
+                        # 创建一个新敌人坦克出现事件对象，并携带参数
+                        event_rand_enemy = pygame.event.Event(conf.EVENT_NEW_ENEMY_TANK, tank=enemy_tank)
+                        pygame.event.post(event_rand_enemy)
             # EVENT_LOCK
             if event.type == conf.EVENT_LOCK:
                 for enemyTank in conf.enemyTankGroup:
@@ -212,6 +210,7 @@ def game_run_logic(conf, josn_name):
             # 加一条命
             if event.type == conf.EVENT_ADD_LIFE:
                 event.tank.life_times = event.tank.life_times + 1
+                print("EVENT_ADD_LIFE", event.tank.id, event.tank.life_times)
 
             # EVENT_NONE_LIFE
             if event.type == conf.EVENT_NONE_OUR_LIFE:
@@ -229,17 +228,17 @@ def game_run_logic(conf, josn_name):
 
         key_pressed = pygame.key.get_pressed()
         if key_pressed[pygame.K_j]:
-            bullet = ourTank1.shoot()
+            bullet = our_tank1.shoot()
             conf.bulletGroup.add(bullet)
             conf.ourBulletGroup.add(bullet)
         if key_pressed[pygame.K_w]:
-            ourTank1.move_up(bgMap, conf.tankGroup)
+            our_tank1.move_up(bgMap, conf.tankGroup)
         elif key_pressed[pygame.K_s]:
-            ourTank1.move_down(bgMap, conf.tankGroup)
+            our_tank1.move_down(bgMap, conf.tankGroup)
         elif key_pressed[pygame.K_a]:
-            ourTank1.move_left(bgMap, conf.tankGroup)
+            our_tank1.move_left(bgMap, conf.tankGroup)
         elif key_pressed[pygame.K_d]:
-            ourTank1.move_right(bgMap, conf.tankGroup)
+            our_tank1.move_right(bgMap, conf.tankGroup)
 
         # 对方进行的行动
         for tank in conf.enemyTankGroup:
@@ -249,13 +248,13 @@ def game_run_logic(conf, josn_name):
                 conf.enemyBulletGroup.add(bullet)
 
         # 渲染地图，坦克，子弹,道具
-        bgMap.this_blit(screen)
+        bgMap.this_blit(conf.screen)
         for tank in conf.tankGroup:
-            tank.this_blit(screen)
+            tank.this_blit(conf.screen)
         for bullet in conf.bulletGroup:
-            bullet.this_blit(screen, bgMap)
+            bullet.this_blit(conf.screen, bgMap)
         for this_prop in conf.propGroup:
-            this_prop.this_blit(screen)
+            this_prop.this_blit(conf.screen)
 
         # 更新屏幕
         pygame.display.flip()
