@@ -4,6 +4,7 @@ import pygame
 
 import bullet
 import conf
+import utils
 
 
 class Tank(pygame.sprite.Sprite):
@@ -20,12 +21,12 @@ class Tank(pygame.sprite.Sprite):
         self.locked = False
 
         if own_group == "our":
-            self.tank_together_image = conf.gain_our_tank_img(player_id, level).convert_alpha()
+            self.tank_together_image = utils.gain_our_tank_img(player_id, level).convert_alpha()
             self.dir_x, self.dir_y = 0, 1
         if own_group == "enemy":
             self.kind = kind
             self.has_prop = has_prop
-            self.tank_together_image = conf.gain_enemy_tank_img(kind, has_prop).convert_alpha()
+            self.tank_together_image = utils.gain_enemy_tank_img(kind, has_prop).convert_alpha()
             self.dir_x, self.dir_y = 0, -1
 
         self.tank_image = self.tank_together_image.subsurface((0, 0), (48, 48))
@@ -66,14 +67,14 @@ class Tank(pygame.sprite.Sprite):
     def level_up(self, num):
         if num == 0:
             return
-        level = conf.gain_num(self.level) + num
+        level = utils.gain_num(self.level) + num
         if 0 <= level <= 3:
             self.level = level
         elif level > 3:
             self.level = 3
         else:
             self.level = 0
-        self.tank_together_image = conf.gain_our_tank_img(self.player_id, self.level).convert_alpha()
+        self.tank_together_image = utils.gain_our_tank_img(self.player_id, self.level).convert_alpha()
 
     def level_down(self, num):
         if num == 0:
@@ -85,7 +86,7 @@ class Tank(pygame.sprite.Sprite):
             self.level = 3
         else:
             self.level = 0
-        self.tank_together_image = conf.gain_our_tank_img(self.player_id, self.level).convert_alpha()
+        self.tank_together_image = utils.gain_our_tank_img(self.player_id, self.level).convert_alpha()
 
     # 先按照之前的方向走,如果碰撞，随机选择一个方向重新走
     def let_ai_action(self, bg_map, tank_group):

@@ -1,8 +1,8 @@
 import random
 import sys
-
 import pygame
 
+import utils
 from tank import Tank
 from prop import Prop
 import map
@@ -90,7 +90,7 @@ def game_run_logic(conf, josn_name):
 
     conf.start_sound.play()
 
-    json_config = conf.load_json_conf(josn_name)
+    json_config = utils.load_json_conf(josn_name)
 
     # 设置title
     pygame.display.set_caption(json_config["title"])
@@ -224,7 +224,7 @@ def game_run_logic(conf, josn_name):
                 game_run_result = "win_page"
 
         # 校验是否已经全部没有生命值
-        conf.check_lose_win()
+        utils.check_lose_win()
 
         key_pressed = pygame.key.get_pressed()
         if key_pressed[pygame.K_j]:
