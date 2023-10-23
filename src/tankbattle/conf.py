@@ -5,8 +5,9 @@ import pygame
 pygame.init()
 pygame.mixer.init()
 
-SCREEN_WIDTH = 630
-SCREEN_HEIGHT = 630
+# 576,576
+SCREEN_WIDTH = 24 * 24
+SCREEN_HEIGHT = 24 * 24
 
 enemy_tank_seq = 1000
 
@@ -110,4 +111,14 @@ ourBulletGroup = pygame.sprite.Group()
 enemyBulletGroup = pygame.sprite.Group()
 
 # 老家位置
-home_rect = 291, 579
+home_xy = [12, 22]
+# 老家周边位置
+home_near_xy =[11, 21], [11, 22], [11, 23], [12, 21], [13, 21], [14, 21], [14, 22], [14, 23]
+# 向上
+up_dir = [0, -1]
+# 向下
+down_dir = [0, 1]
+# 向左
+left_dir = [-1, 0]
+# 向右
+right_dir = [1, 0]

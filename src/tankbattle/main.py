@@ -25,6 +25,5 @@ def main_loop():
             print("开始lose页面")
             current_page = page_logic.game_end_logic(conf, "lose")
 
-
 # 运行游戏
 main_loop()

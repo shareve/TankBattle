@@ -59,15 +59,20 @@ def gain_num(num):
 # 游戏位置值转化为像素位置值
 def gain_pixel(pos):
     if pos:
-        return 3 + pos * 24
+        return pos * 24
     else:
         return 0
+
+
+# 游戏位置值转化为像素位置值
+def gain_pixel_xy(pos_xy):
+    return [pos_xy[0] * 24, pos_xy[1] * 24]
 
 
 # 像素位置值转化为游戏位置值
 def gain_pos(pixel):
     if pixel:
-        return pixel - 3 / 24
+        return pixel / 24
     else:
         return 0
 

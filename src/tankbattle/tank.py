@@ -8,7 +8,8 @@ import utils
 
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, id, player_id, life_times, level, own_group, kind, has_prop, speed, left, top):
+    # speed是速度；x,y是位置；dir_x,dir_y是方向；
+    def __init__(self, id, player_id, life_times, level, own_group, kind, has_prop, speed, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.id = id
         # level有4级；0级默认无变化，1级子弹加速，2级形状变化+子弹，3级形状再变化+子弹打铁+多挨打1次
@@ -17,6 +18,8 @@ class Tank(pygame.sprite.Sprite):
         self.speed = speed
         self.player_id = player_id
         self.life_times = life_times
+        self.x = x
+        self.y = y
         self.protected = False
         self.locked = False
 
@@ -31,7 +34,7 @@ class Tank(pygame.sprite.Sprite):
 
         self.tank_image = self.tank_together_image.subsurface((0, 0), (48, 48))
         self.rect = self.tank_image.get_rect()
-        self.rect.left, self.rect.top = left, top
+        self.rect.left, self.rect.top = utils.gain_pixel(x), utils.gain_pixel(y)
 
     def shoot(self):
         bullet_speed = 10
@@ -98,28 +101,12 @@ class Tank(pygame.sprite.Sprite):
         if action_choice <= 80:
             return
 
-        collision = False
         # 先按照之前的方向走
-        if self.dir_x == 0 and self.dir_y == -1:
-            collision = not self.move_up(bg_map, tank_group)
-        elif self.dir_x == 0 and self.dir_y == 1:
-            collision = not self.move_down(bg_map, tank_group)
-        elif self.dir_x == -1 and self.dir_y == 0:
-            collision = not self.move_left(bg_map, tank_group)
-        elif self.dir_x == 1 and self.dir_y == 0:
-            collision = not self.move_right(bg_map, tank_group)
-
+        collision = not self.move_dir(bg_map, tank_group,[self.dir_x,self.dir_y])
         if collision:
             # 随机选择一个方向
-            move_choice = random.choice(([0, 1], [0, -1], [1, 0], [-1, 0]))
-            if move_choice[0] == 0 and move_choice[1] == -1:
-                self.move_up(bg_map, tank_group)
-            elif move_choice[0] == 0 and move_choice[1] == 1:
-                self.move_down(bg_map, tank_group)
-            elif move_choice[0] == -1 and move_choice[1] == 0:
-                self.move_left(bg_map, tank_group)
-            elif move_choice[0] == 1 and move_choice[1] == 0:
-                self.move_right(bg_map, tank_group)
+            move_choice = random.choice((conf.up_dir, conf.down_dir, conf.left_dir, conf.right_dir))
+            self.move_dir(bg_map, tank_group,move_choice)
 
         # shoot的概率为10/100
         shoot_choice = random.randint(1, 100)
@@ -127,99 +114,55 @@ class Tank(pygame.sprite.Sprite):
             return self.shoot()
 
     # False说明发生碰撞
-    def move_up(self, bg_map, tank_group):
+    def move_dir(self, bg_map, tank_group, dir_x_y):
         brick_group = bg_map.brickGroup
         iron_group = bg_map.ironGroup
-        self.rect = self.rect.move(self.speed * 0, self.speed * -1)
-        self.tank_image = self.tank_together_image.subsurface((0, 0), (48, 48))
-        self.dir_x, self.dir_y = 0, -1
-        if self.rect.top < 3:
+        # 调整位置，四舍五入取整
+        if self.dir_x == 0 and dir_x_y[0] != 0:
+            self.rect.top = round(self.rect.top / 24) * 24
+        elif self.dir_y == 0 and dir_x_y[1] != 0:
+            self.rect.left = round(self.rect.left / 24) * 24
+
+        self.dir_x, self.dir_y = dir_x_y
+        self.rect = self.rect.move(self.speed * dir_x_y[0], self.speed * dir_x_y[1])
+        if dir_x_y == conf.up_dir:
+            self.tank_image = self.tank_together_image.subsurface((0, 0), (48, 48))
+        elif dir_x_y == conf.down_dir:
+            self.tank_image = self.tank_together_image.subsurface((0, 48), (48, 48))
+        elif dir_x_y == conf.left_dir:
+            self.tank_image = self.tank_together_image.subsurface((0, 96), (48, 48))
+        elif dir_x_y == conf.right_dir:
+            self.tank_image = self.tank_together_image.subsurface((0, 144), (48, 48))
+
+        # if self.own_group == "our":
+        #     print("move_dir", "pos_x", utils.gain_pos(self.rect.left), "pos_y", utils.gain_pos(self.rect.top))
+
+        if utils.gain_pos(self.rect.top) < 0:
             self.rect = self.rect.move(self.speed * 0, self.speed * 1)
             return False
-        if pygame.sprite.spritecollide(self, brick_group, False, None) \
-                or pygame.sprite.spritecollide(self, iron_group, False, None):
-            self.rect = self.rect.move(self.speed * 0, self.speed * 1)
-            # print("moveUp", "brick_group", "碰")
-            return False
-
-        tank_group.remove(self)
-        collide = pygame.sprite.spritecollide(self, tank_group, False, None)
-        tank_group.add(self)
-        if collide:
-            # print("moveUp", "tank_group", "碰")
-            self.rect = self.rect.move(self.speed * 0, self.speed * 1)
-            return False
-        self.check_touch_prop()
-        return True
-
-    def move_down(self, bg_map, tank_group):
-        brick_group = bg_map.brickGroup
-        iron_group = bg_map.ironGroup
-        self.rect = self.rect.move(self.speed * 0, self.speed * 1)
-        self.tank_image = self.tank_together_image.subsurface((0, 48), (48, 48))
-        self.dir_x, self.dir_y = 0, 1
-        if self.rect.bottom > 630 - 3:
+        if utils.gain_pos(self.rect.top) > 22:
             self.rect = self.rect.move(self.speed * 0, self.speed * -1)
             return False
-        if pygame.sprite.spritecollide(self, brick_group, False, None) \
-                or pygame.sprite.spritecollide(self, iron_group, False, None):
-            self.rect = self.rect.move(self.speed * 0, self.speed * -1)
-            # print("moveDown", "brick_group", "碰")
-            return False
-        tank_group.remove(self)
-        collide = pygame.sprite.spritecollide(self, tank_group, False, None)
-        tank_group.add(self)
-        if collide:
-            self.rect = self.rect.move(self.speed * 0, self.speed * -1)
-            # print("moveDown", "tankGroup", "碰")
-            return False
-        self.check_touch_prop()
-        return True
-
-    def move_left(self, bg_map, tank_group):
-        brick_group = bg_map.brickGroup
-        iron_group = bg_map.ironGroup
-        self.rect = self.rect.move(self.speed * -1, self.speed * 0)
-        self.tank_image = self.tank_together_image.subsurface((0, 96), (48, 48))
-        self.dir_x, self.dir_y = -1, 0
-        if self.rect.left < 3:
+        if utils.gain_pos(self.rect.left) < 0:
             self.rect = self.rect.move(self.speed * 1, self.speed * 0)
             return False
-        if pygame.sprite.spritecollide(self, brick_group, False, None) \
-                or pygame.sprite.spritecollide(self, iron_group, False, None):
-            self.rect = self.rect.move(self.speed * 1, self.speed * 0)
-            # print("moveLeft", "brick_group", "碰")
-            return False
-        tank_group.remove(self)
-        collide = pygame.sprite.spritecollide(self, tank_group, False, None)
-        tank_group.add(self)
-        if collide:
-            self.rect = self.rect.move(self.speed * 1, self.speed * 0)
-            # print("moveLeft", "tankGroup", "碰")
-            return False
-        self.check_touch_prop()
-        return True
-
-    def move_right(self, bg_map, tank_group):
-        brick_group = bg_map.brickGroup
-        iron_group = bg_map.ironGroup
-        self.rect = self.rect.move(self.speed * 1, self.speed * 0)
-        self.tank_image = self.tank_together_image.subsurface((0, 144), (48, 48))
-        self.dir_x, self.dir_y = 1, 0
-        if self.rect.right > 630 - 3:
+        if utils.gain_pos(self.rect.left) > 22:
             self.rect = self.rect.move(self.speed * -1, self.speed * 0)
             return False
         if pygame.sprite.spritecollide(self, brick_group, False, None) \
                 or pygame.sprite.spritecollide(self, iron_group, False, None):
-            self.rect = self.rect.move(self.speed * -1, self.speed * 0)
-            # print("moveRight", "brick_group", "碰")
+            # print("move_dir", "tank_group", "碰",dir_x,dir_y)
+            # 反方向移动一格
+            self.rect = self.rect.move(self.speed * - dir_x_y[0], self.speed * -dir_x_y[1])
             return False
+
         tank_group.remove(self)
         collide = pygame.sprite.spritecollide(self, tank_group, False, None)
         tank_group.add(self)
         if collide:
-            self.rect = self.rect.move(self.speed * -1, self.speed * 0)
-            # print("moveRight", "tankGroup", "碰")
+            # print("move_dir", "tank_group", "碰",dir_x,dir_y)
+            # 反方向移动一格
+            self.rect = self.rect.move(self.speed * -dir_x_y[0], self.speed * -dir_x_y[1])
             return False
         self.check_touch_prop()
         return True

@@ -1,6 +1,7 @@
 import pygame
 
 import conf
+import utils
 
 
 class Brick(pygame.sprite.Sprite):
@@ -25,11 +26,11 @@ class Home(pygame.sprite.Sprite):
         if home_destroyed:
             self.image = conf.home_destroyed_image
             self.rect = self.image.get_rect()
-            self.rect.left, self.rect.top = conf.home_rect
+            self.rect.left, self.rect.top = utils.gain_pixel_xy(conf.home_xy)
         else:
             self.image = conf.home_image
             self.rect = self.image.get_rect()
-            self.rect.left, self.rect.top = conf.home_rect
+            self.rect.left, self.rect.top = utils.gain_pixel_xy(conf.home_xy)
 
 
 class Map():
@@ -48,13 +49,20 @@ class Map():
         else:
             iron_place_list = json_config["iron_list"]
 
+        # 家周边的砖块
+        for brick_place in conf.home_near_xy:
+            brick = Brick()
+            brick.rect.left, brick.rect.top = utils.gain_pixel_xy(brick_place)
+            self.brickGroup.add(brick)
+        # 配置的砖块
         for brick_place in brick_place_list:
             brick = Brick()
-            brick.rect.left, brick.rect.top = brick_place[0], brick_place[1]
+            brick.rect.left, brick.rect.top = utils.gain_pixel_xy(brick_place)
             self.brickGroup.add(brick)
+        # 配置的铁
         for iron_place in iron_place_list:
             iron = Iron()
-            iron.rect.left, iron.rect.top = iron_place[0], iron_place[1]
+            iron.rect.left, iron.rect.top = utils.gain_pixel_xy(iron_place)
             self.ironGroup.add(iron)
 
     def change_home_destroyed(self):
