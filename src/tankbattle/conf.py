@@ -13,7 +13,7 @@ enemy_tank_seq = 1000
 
 # 创建字体对象
 font_size = 36
-font = pygame.font.SysFont("arialunicode", font_size)
+font = pygame.font.SysFont("simHei", font_size)
 
 # 创建屏幕对象
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

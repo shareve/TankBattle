@@ -141,8 +141,8 @@ def game_run_logic(conf, josn_name):
                     print("ourTank1.life_times", our_tank1.life_times)
                     conf.tankGroup.add(our_tank1)
                     conf.ourTankGroup.add(our_tank1)
-                else:
-                    ourTank2 = Tank(2, 1, 3, 0, "our", None, None, 3, 16, 22)
+                elif tank.player_id == 1:
+                    ourTank2 = Tank(tank.id, tank.player_id, tank.life_times, 0, "our", None, None, 3, 16, 22)
                     print("ourTank2.life_times", ourTank2.life_times)
                     conf.tankGroup.add(ourTank2)
                     conf.ourTankGroup.add(ourTank2)
