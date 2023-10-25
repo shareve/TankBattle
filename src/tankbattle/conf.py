@@ -1,5 +1,4 @@
-import json
-
+import sys
 import pygame
 
 pygame.init()
@@ -13,7 +12,16 @@ enemy_tank_seq = 1000
 
 # 创建字体对象
 font_size = 36
-font = pygame.font.SysFont("simHei", font_size)
+if sys.platform == "win32":
+    print("当前系统是 Windows")
+    font = pygame.font.SysFont("simHei", font_size)
+elif sys.platform == "darwin":
+    print("当前系统是 macOS")
+    font = pygame.font.SysFont("arialunicode", font_size)
+else:
+    print("当前系统不是 Windows 也不是 macOS")
+    font = pygame.font.SysFont("simHei", font_size)
+
 
 # 创建屏幕对象
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

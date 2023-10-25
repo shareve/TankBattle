@@ -1,7 +1,7 @@
 import json
 import pygame
-import conf
 
+import conf
 
 def gain_our_tank_img(player_id, level):
     tank_together_image = conf.p1_tank_L0_image

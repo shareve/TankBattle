@@ -1,11 +1,9 @@
-import random
-
 import pygame
+import random
 
 import bullet
 import conf
 import utils
-
 
 class Tank(pygame.sprite.Sprite):
     # speed是速度；x,y是位置；dir_x,dir_y是方向；

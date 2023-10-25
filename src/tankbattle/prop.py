@@ -3,7 +3,6 @@ import random
 
 import conf
 
-
 class Prop(pygame.sprite.Sprite):
     def __init__(self,kind=None):
         pygame.sprite.Sprite.__init__(self)

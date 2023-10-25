@@ -7,7 +7,6 @@ from tank import Tank
 from prop import Prop
 import map
 
-
 # 选择关卡页面
 def select_chapter_logic(conf):
     selected_chapter = "select_chapter"
