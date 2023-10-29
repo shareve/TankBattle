@@ -27,7 +27,7 @@ def select_chapter_logic(conf):
                 elif event.key == pygame.K_3:
                     selected_chapter = "chapter3"
 
-        conf.screen.blit(conf.background_image, (0, 0))
+        conf.screen.fill(conf.color_black)
 
         # 绘制游戏关卡选项
         start_text = conf.font.render("请输入对应数字:", True, (255, 255, 255))

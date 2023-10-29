@@ -71,7 +71,7 @@ class Map():
     # 后面的渲染，会覆盖掉前面的渲染
     def this_blit(self, screen):
         # 画背景
-        screen.blit(conf.background_image, (0, 0))
+        conf.screen.fill(conf.color_black)
         # 画砖块
         for each in self.brickGroup:
             screen.blit(each.image, each.rect)

@@ -10,6 +10,8 @@ SCREEN_HEIGHT = 24 * 24
 
 enemy_tank_seq = 1000
 
+color_black = (0, 0, 0)
+
 # 创建字体对象
 font_size = 36
 if sys.platform == "win32":
@@ -21,7 +23,6 @@ elif sys.platform == "darwin":
 else:
     print("当前系统不是 Windows 也不是 macOS")
     font = pygame.font.SysFont("simHei", font_size)
-
 
 # 创建屏幕对象
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -75,8 +76,7 @@ bullet_down = pygame.image.load(r"../../img/bullet_down.png")
 bullet_left = pygame.image.load(r"../../img/bullet_left.png")
 bullet_right = pygame.image.load(r"../../img/bullet_right.png")
 
-# 背景等
-background_image = pygame.image.load(r"../../img/background.png")
+# 老家，砖
 home_image = pygame.image.load(r"../../img/home.png")
 home_destroyed_image = pygame.image.load(r"../../img/home_destroyed.png")
 brick_image = pygame.image.load(r"../../img/brick.png")
@@ -121,7 +121,7 @@ enemyBulletGroup = pygame.sprite.Group()
 # 老家位置
 home_xy = [12, 22]
 # 老家周边位置
-home_near_xy =[11, 21], [11, 22], [11, 23], [12, 21], [13, 21], [14, 21], [14, 22], [14, 23]
+home_near_xy = [11, 21], [11, 22], [11, 23], [12, 21], [13, 21], [14, 21], [14, 22], [14, 23]
 # 向上
 up_dir = [0, -1]
 # 向下
